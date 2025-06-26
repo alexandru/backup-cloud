@@ -81,7 +81,14 @@ if [ "$1" = "run_now" ]; then
 fi
 
 # Print timezone and current datetime information
-echo "Container timezone: $(cat /etc/timezone 2>/dev/null || ls -la /etc/localtime 2>/dev/null | sed 's/.*\/zoneinfo\///' || echo 'Unknown')"
+if [ -f /etc/timezone ]; then
+    TZ_DISPLAY=$(cat /etc/timezone)
+elif [ -L /etc/localtime ]; then
+    TZ_DISPLAY=$(readlink /etc/localtime | sed 's|.*/zoneinfo/||')
+else
+    TZ_DISPLAY="UTC (default or unknown)"
+fi
+echo "Container timezone: $TZ_DISPLAY"
 echo "Current date and time: $(date '+%Y-%m-%d %H:%M:%S %Z (%z)')"
 
 # Start cron in the foreground
