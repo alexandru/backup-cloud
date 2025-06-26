@@ -32,11 +32,11 @@ services:
     image: ghcr.io/alexandru/backup-cloud
     container_name: backup-cloud
     environment:
-      - RCLONE_SOURCE_PATH=onedrive:
-      - RCLONE_DESTINATION_PATH=cloud:OneDrive
-      - BACKUP_SCHEDULE=0 3 * * *
-      - BACKUP_DIR=cloud:Backups/OneDrive
-      - TZ=Europe/Bucharest
+      RCLONE_SOURCE_PATH: "onedrive:"
+      RCLONE_DESTINATION_PATH: "cloud:OneDrive"
+      BACKUP_SCHEDULE: "0 3 * * *"
+      BACKUP_DIR: "cloud:Backups/OneDrive"
+      TZ: "Europe/Bucharest"
     volumes:
       - "$HOME/.config/rclone/rclone.conf:/rclone.conf:ro"
 ```

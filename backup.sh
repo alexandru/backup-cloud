@@ -46,8 +46,8 @@ if [ -f "/rclone.conf" ]; then
 fi
 
 # Initial check to ensure rclone is properly configured
-if ! rclone config show; then
-    echo "ERROR: rclone is not configured properly. Please mount a config file to /rclone.conf"
+if ! rclone listremotes >/dev/null 2>&1; then
+    echo "ERROR: rclone is not configured properly or no remotes are defined. Please mount a config file to /rclone.conf."
     exit 1
 fi
 
@@ -81,8 +81,15 @@ if [ "$1" = "run_now" ]; then
 fi
 
 # Set /etc/localtime if TZ is set and the zoneinfo file exists
-if [ -n "$TZ" ] && [ -f "/usr/share/zoneinfo/$TZ" ]; then
-    ln -sf "/usr/share/zoneinfo/$TZ" /etc/localtime
+if [ -n "$TZ" ]; then
+    echo "TZ environment variable is set to: $TZ"
+    if [ -f "/usr/share/zoneinfo/$TZ" ]; then
+        ln -sf "/usr/share/zoneinfo/$TZ" /etc/localtime
+    else
+        echo "WARNING: /usr/share/zoneinfo/$TZ does not exist. Timezone will not be set."
+    fi
+else
+    echo "TZ environment variable is not set."
 fi
 
 # Print timezone and current datetime information
