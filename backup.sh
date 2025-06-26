@@ -80,6 +80,11 @@ if [ "$1" = "run_now" ]; then
     exit 0
 fi
 
+# Set /etc/localtime if TZ is set and the zoneinfo file exists
+if [ -n "$TZ" ] && [ -f "/usr/share/zoneinfo/$TZ" ]; then
+    ln -sf "/usr/share/zoneinfo/$TZ" /etc/localtime
+fi
+
 # Print timezone and current datetime information
 if [ -f /etc/timezone ]; then
     TZ_DISPLAY=$(cat /etc/timezone)
