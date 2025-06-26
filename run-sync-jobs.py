@@ -7,7 +7,7 @@ import sys
 JOBS_FILE = os.environ.get('JOBS_FILE', '/config/jobs.json')
 
 if not os.path.exists(JOBS_FILE):
-    print(f"ERROR: Jobs file not found: {JOBS_FILE}")
+    print(f"ERROR: Jobs file not found: {JOBS_FILE}", flush=True)
     sys.exit(1)
 
 with open(JOBS_FILE, 'r') as f:
@@ -21,11 +21,12 @@ for job in jobs:
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d.%H-%M-%S')
     backup_dir_param = f'--backup-dir "{backup_dir}/{timestamp}"' if backup_dir else ''
 
+    print(f"[{datetime.datetime.now()}] ------------------------------------------------", flush=True)
     cmd = f'rclone sync "{source}" "{destination}" -v --transfers 4 --checkers 8 {sync_params} {backup_dir_param}'
-    print(f"[{datetime.datetime.now()}] Executing command:")
-    print(cmd)
+    print(f"[{datetime.datetime.now()}] Executing command:", flush=True)
+    print(cmd, flush=True)
     result = subprocess.run(cmd, shell=True)
     if result.returncode == 0:
-        print(f"[{datetime.datetime.now()}] Backup completed successfully")
+        print(f"[{datetime.datetime.now()}] Backup completed successfully", flush=True)
     else:
-        print(f"[{datetime.datetime.now()}] Backup failed with exit code {result.returncode}", file=sys.stderr)
+        print(f"[{datetime.datetime.now()}] Backup failed with exit code {result.returncode}", file=sys.stderr, flush=True)
