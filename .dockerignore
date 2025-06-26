@@ -1,0 +1,16 @@
+# Git files
+.git
+.gitignore
+
+# Docker files
+.dockerignore
+
+# Documentation
+README.md
+LICENSE
+*.md
+.img
+
+# Temporary files
+*.tmp
+*.log
