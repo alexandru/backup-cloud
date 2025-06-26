@@ -1,6 +1,6 @@
-# Backup Cloud - OneDrive to NextCloud
+# Backup Cloud
 
-A Docker container that periodically backs up files, via `rclone`, from one remote to another (e.g., from OneDrive to NextCloud).
+A Docker container that periodically backs up files, via `rclone`, from one remote to another (e.g., from OneDrive to NextCloud, or to local).
 
 ## Usage
 
