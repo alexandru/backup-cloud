@@ -8,7 +8,7 @@ RUN apk add --no-cache \
     curl \
     unzip \
     bash \
-    dcron
+    busybox-suid
 
 # Install the latest version of rclone
 RUN curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip && \

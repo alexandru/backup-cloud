@@ -12,14 +12,20 @@ run_backup() {
         echo "[$(date)] Using backup directory: $BACKUP_DIR/$TIMESTAMP"
     fi
 
-    # Run rclone with logging and custom parameters
-    eval "rclone sync \"$RCLONE_SOURCE_PATH\" \"$RCLONE_DESTINATION_PATH\" \
-        --progress \
+    # Construct the full rclone command
+    RCLONE_CMD="rclone sync \"$RCLONE_SOURCE_PATH\" \"$RCLONE_DESTINATION_PATH\" \
+        -v \
         --transfers 4 \
         --checkers 8 \
-        -v \
         $RCLONE_SYNC_PARAMS \
         $BACKUP_DIR_PARAM"
+    
+    # Print the full command for debugging
+    echo "[$(date)] Executing command:"
+    echo "$RCLONE_CMD"
+    
+    # Run rclone with logging and custom parameters
+    eval "$RCLONE_CMD"
     
     backup_status=$?
     if [ $backup_status -eq 0 ]; then
@@ -29,9 +35,19 @@ run_backup() {
     fi
 }
 
+# Setup rclone configuration
+CONFIG_DIR="/root/.config/rclone"
+mkdir -p $CONFIG_DIR
+
+# Check if config is mounted at alternative location
+if [ -f "/rclone.conf" ]; then
+    echo "Found rclone config at /rclone.conf, copying to $CONFIG_DIR/rclone.conf"
+    cp /rclone.conf $CONFIG_DIR/rclone.conf
+fi
+
 # Initial check to ensure rclone is properly configured
 if ! rclone config show; then
-    echo "ERROR: rclone is not configured properly. Please mount a config file to /root/.config/rclone/rclone.conf"
+    echo "ERROR: rclone is not configured properly. Please mount a config file to /rclone.conf"
     exit 1
 fi
 
@@ -54,9 +70,9 @@ if [ "$BACKUP_SCHEDULE" = "now" ]; then
 fi
 
 # Create crontab file
-echo "$BACKUP_SCHEDULE /app/backup.sh run_now" > /tmp/backup-crontab
-crontab /tmp/backup-crontab
-rm /tmp/backup-crontab
+mkdir -p /etc/crontabs
+echo "$BACKUP_SCHEDULE /app/backup.sh run_now" > /etc/crontabs/root
+chmod 0644 /etc/crontabs/root
 
 # If the script is called with the run_now parameter, execute backup directly
 if [ "$1" = "run_now" ]; then
@@ -64,6 +80,11 @@ if [ "$1" = "run_now" ]; then
     exit 0
 fi
 
+# Print timezone and current datetime information
+echo "Container timezone: $(cat /etc/timezone 2>/dev/null || ls -la /etc/localtime 2>/dev/null | sed 's/.*\/zoneinfo\///' || echo 'Unknown')"
+echo "Current date and time: $(date '+%Y-%m-%d %H:%M:%S %Z (%z)')"
+
 # Start cron in the foreground
 echo "Starting cron service..."
-exec crond -f -d 8
+# Use busybox crond which is more container-friendly
+exec /usr/sbin/crond -f -l 8

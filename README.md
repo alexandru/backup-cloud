@@ -22,11 +22,12 @@ docker build -t backup-cloud .
 
 ```bash
 docker run -d \
-  -v "$HOME/.config/rclone/rclone.conf:/root/.config/rclone/rclone.conf" \
+  -v "$HOME/.config/rclone/rclone.conf:/rclone.conf:ro" \
   -e RCLONE_SOURCE_PATH="onedrive:" \
   -e RCLONE_DESTINATION_PATH="cloud:OneDrive" \
   -e BACKUP_SCHEDULE="0 3 * * *" \
   -e BACKUP_DIR="cloud:Backups/OneDrive" \
+  -e TZ="Europe/Bucharest" \
   --name backup-cloud \
   ghcr.io/alexandru/backup-cloud
 ```
@@ -37,6 +38,7 @@ docker run -d \
 - `RCLONE_DESTINATION_PATH`: Destination path for backups (default: `nextcloud:`)
 - `BACKUP_SCHEDULE`: Cron schedule expression (default: `0 3 * * *` - 3 AM daily)
   - Set to `now` to run a one-time backup and exit
+  - To run at 15:01 (3:01 PM), use: `1 15 * * *`
 - `RCLONE_SYNC_PARAMS`: Additional parameters for rclone sync command (default: `--delete-excluded -c --track-renames --onedrive-hash-type sha1`)
 - `BACKUP_DIR`: If specified, enables rclone's backup-dir functionality with timestamped subdirectories (e.g., set to `nextcloud:Backups/Versions` to store changed files)
 
@@ -46,8 +48,8 @@ Before using this container, you need to configure `rclone` with your cloud stor
 
 1. Install `rclone` on your local machine
 2. Run `rclone config` to set up your OneDrive and NextCloud connections
-3. Copy the config file (usually found at `~/.config/rclone/rclone.conf`) to your host
-4. Mount this file when running the container
+3. The config file is typically found at `~/.config/rclone/rclone.conf`
+4. Mount this file to `/rclone.conf` as read-only when running the container
 
 ## Viewing Logs
 
@@ -59,11 +61,12 @@ docker logs backup-cloud
 
 ```bash
 docker run --rm \
-  -v /path/to/rclone.conf:/root/.config/rclone/rclone.conf \
+  -v "$HOME/.config/rclone/rclone.conf:/rclone.conf:ro" \
   -e RCLONE_SOURCE_PATH="onedrive:Documents" \
   -e RCLONE_DESTINATION_PATH="nextcloud:Backups/Documents" \
   -e BACKUP_SCHEDULE="now" \
   -e RCLONE_SYNC_PARAMS="--delete-excluded -c --track-renames --onedrive-hash-type sha1" \
   -e BACKUP_DIR="nextcloud:Backups/Versions" \
-  backup-cloud
+  -e TZ="Europe/Bucharest" \
+  ghcr.io/alexandru/backup-cloud
 ```
