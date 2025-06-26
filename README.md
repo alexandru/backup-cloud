@@ -49,15 +49,13 @@ Mount the `jobs.json` file in the `/config` directory:
     "source": "onedrive:",
     "destination": "cloud:OneDrive",
     "sync_params": "--delete-excluded -c --track-renames --onedrive-hash-type sha1",
-    "backup_dir": "cloud:Backups/OneDrive",
-    "schedule": "04 17 * * *"
+    "backup_dir": "cloud:Backups/OneDrive"
   },
   {
     "source": "onedrive-server:",
     "destination": "cloud:Server Backups",
     "sync_params": "--delete-excluded -c --track-renames --onedrive-hash-type sha1",
-    "backup_dir": "cloud:Backups/Server Backups",
-    "schedule": "16 17 * * *"
+    "backup_dir": "cloud:Backups/Server Backups"
   }
 ]
 ```
