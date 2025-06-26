@@ -13,12 +13,10 @@ docker build -t backup-cloud .
 ### Running the Container
 
 ```bash
-docker run -d \
-  -v "$HOME/.config/rclone/rclone.conf:/rclone.conf:ro" \
-  -e RCLONE_SOURCE_PATH="onedrive:" \
-  -e RCLONE_DESTINATION_PATH="cloud:OneDrive" \
+docker run \
+  -v "$HOME/.config/rclone/rclone.conf:/config/rclone.conf:ro" \
+  -v "$HOME/.config/backup-cloud/jobs.json:/config/jobs.json:ro" \
   -e BACKUP_SCHEDULE="0 3 * * *" \
-  -e BACKUP_DIR="cloud:Backups/OneDrive" \
   -e TZ="Europe/Bucharest" \
   --name backup-cloud \
   ghcr.io/alexandru/backup-cloud
@@ -32,21 +30,34 @@ services:
     image: ghcr.io/alexandru/backup-cloud
     container_name: backup-cloud
     environment:
-      RCLONE_SOURCE_PATH: "onedrive:"
-      RCLONE_DESTINATION_PATH: "cloud:OneDrive"
       BACKUP_SCHEDULE: "0 3 * * *"
-      BACKUP_DIR: "cloud:Backups/OneDrive"
       TZ: "Europe/Bucharest"
     volumes:
-      - "$HOME/.config/rclone/rclone.conf:/rclone.conf:ro"
+      - "$HOME/.config/rclone/rclone.conf:/config/rclone.conf:ro"
+      - "$HOME/.config/backup-cloud/jobs.json:/config/jobs.json:ro"
 ```
 
-### Environment Variables
+> **Note:** The `BACKUP_SCHEDULE` environment variable sets the global cron schedule for all jobs in jobs.json. To run immediately, set `BACKUP_SCHEDULE=now`.
 
-- `RCLONE_SOURCE_PATH`: Source path for backups (default: `onedrive:`)
-- `RCLONE_DESTINATION_PATH`: Destination path for backups (default: `nextcloud:`)
-- `BACKUP_SCHEDULE`: Cron schedule expression (default: `0 3 * * *` - 3 AM daily)
-  - Set to `now` to run a one-time backup and exit
-  - To run at 15:01 (3:01 PM), use: `1 15 * * *`
-- `RCLONE_SYNC_PARAMS`: Additional parameters for rclone sync command (default: `--delete-excluded -c --track-renames --onedrive-hash-type sha1`)
-- `BACKUP_DIR`: If specified, enables rclone's backup-dir functionality with timestamped subdirectories (e.g., set to `nextcloud:Backups/Versions` to store changed files)
+### jobs.json Example
+
+Mount the `jobs.json` file in the `/config` directory:
+
+```json
+[
+  {
+    "source": "onedrive:",
+    "destination": "cloud:OneDrive",
+    "sync_params": "--delete-excluded -c --track-renames --onedrive-hash-type sha1",
+    "backup_dir": "cloud:Backups/OneDrive",
+    "schedule": "04 17 * * *"
+  },
+  {
+    "source": "onedrive-server:",
+    "destination": "cloud:Server Backups",
+    "sync_params": "--delete-excluded -c --track-renames --onedrive-hash-type sha1",
+    "backup_dir": "cloud:Backups/Server Backups",
+    "schedule": "16 17 * * *"
+  }
+]
+```

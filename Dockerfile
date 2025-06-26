@@ -8,7 +8,8 @@ RUN apk add --no-cache \
     curl \
     unzip \
     bash \
-    busybox-suid
+    busybox-suid \
+    python3
 
 # Install the latest version of rclone
 RUN curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip && \
@@ -27,11 +28,14 @@ ENV RCLONE_SYNC_PARAMS="--delete-excluded -c --track-renames --onedrive-hash-typ
 ENV BACKUP_DIR=""
 
 # Copy script for backup execution
-COPY backup.sh /app/backup.sh
-RUN chmod +x /app/backup.sh
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Copy Python sync jobs script
+COPY run-sync-jobs.py /app/run-sync-jobs.py
 
 # Set working directory
 WORKDIR /app
 
 # Use a simple entrypoint script
-CMD ["/app/backup.sh"]
+CMD ["/app/entrypoint.sh"]
