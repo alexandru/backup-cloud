@@ -31,8 +31,9 @@ ENV BACKUP_DIR=""
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Copy Python sync jobs script
+# Copy scripts
 COPY run-sync-jobs.py /app/run-sync-jobs.py
+COPY healthcheck.py /app/healthcheck.py
 
 # Set working directory
 WORKDIR /app
