@@ -35,6 +35,12 @@ services:
     volumes:
       - "$HOME/.config/rclone/rclone.conf:/config/rclone.conf:ro"
       - "$HOME/.config/backup-cloud/jobs.json:/config/jobs.json:ro"
+    healthcheck:
+      test: ["CMD", "python", "/healthcheck.py"]
+      interval: 5m
+      timeout: 10s
+      retries: 2
+      start_period: 30s
 ```
 
 > **Note:** The `BACKUP_SCHEDULE` environment variable sets the global cron schedule for all jobs in jobs.json. To run immediately, set `BACKUP_SCHEDULE=now`.
@@ -52,10 +58,9 @@ Mount the `jobs.json` file in the `/config` directory:
     "backup_dir": "cloud:Backups/OneDrive"
   },
   {
-    "source": "onedrive-server:",
-    "destination": "cloud:Server Backups",
+    "source": "server:",
+    "destination": "cloud:Server",
     "sync_params": "--delete-excluded -c --track-renames --onedrive-hash-type sha1",
-    "backup_dir": "cloud:Backups/Server Backups"
   }
 ]
 ```

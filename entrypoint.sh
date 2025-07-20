@@ -9,12 +9,6 @@ if [ -f "/config/rclone.conf" ]; then
     cp /config/rclone.conf $CONFIG_DIR/rclone.conf
 fi
 
-# Initial check to ensure rclone is properly configured
-if ! rclone listremotes >/dev/null 2>&1; then
-    echo "ERROR: rclone is not configured properly or no remotes are defined. Please mount a config file to /config/rclone.conf."
-    exit 1
-fi
-
 echo "Backup container started"
 echo "Backup schedule: $BACKUP_SCHEDULE"
 
