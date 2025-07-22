@@ -8,6 +8,7 @@ import sys
 
 JOBS_FILE = os.environ.get('JOBS_FILE', '/config/jobs.json')
 PID_FILE = '/var/run/run-sync-jobs.pid'
+OUTCOME_FILE = '/var/run/run-sync-jobs.failed'
 
 # Check for existing PID file and running process (no third-party libraries)
 def pid_exists(pid):
@@ -22,8 +23,7 @@ def pid_exists(pid):
 
 def main():
     if not os.path.exists(JOBS_FILE):
-        print(f"ERROR: Jobs file not found: {JOBS_FILE}", flush=True)
-        sys.exit(1)
+        raise FileNotFoundError(f"Jobs file not found: {JOBS_FILE}")
 
     with open(JOBS_FILE, 'r') as f:
         jobs = json.load(f)
@@ -62,6 +62,13 @@ if __name__ == '__main__':
         pf.write(str(os.getpid()))
     try:
         main()
+        # Execution was successful, delete OUTCOME_FILE if it exists
+        if os.path.exists(OUTCOME_FILE):
+            os.remove(OUTCOME_FILE)
+    except Exception as e:
+        # Error occurred, write to OUTCOME_FILE
+        with open(OUTCOME_FILE, 'w') as ef:
+            ef.write(f"Backup failed: {str(e)}\n")
     finally:
         if os.path.exists(PID_FILE):
             os.remove(PID_FILE)  # Clean up PID file on exit
