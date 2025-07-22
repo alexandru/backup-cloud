@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import json
 import subprocess
 import datetime
@@ -26,12 +28,12 @@ def main():
     with open(JOBS_FILE, 'r') as f:
         jobs = json.load(f)
 
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d.%H-%M-%S')
     for job in jobs:
         source = job.get('source')
         destination = job.get('destination')
         sync_params = job.get('sync_params', '')
         backup_dir = job.get('backup_dir', '')
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d.%H-%M-%S')
         backup_dir_param = f'--backup-dir "{backup_dir}/{timestamp}"' if backup_dir else ''
 
         print(f"[{datetime.datetime.now()}] ------------------------------------------------", flush=True)
